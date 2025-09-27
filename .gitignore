@@ -1,0 +1,64 @@
+# === Project-specific ignores ===
+data/time_series/
+toakinrele/.conda/
+neuralhydrology/
+neuralhydrology/datasetzoo/
+neuralhydrology/datautils/
+neuralhydrology/evaluation/
+neuralhydrology/modelzoo/
+neuralhydrology/training/
+neuralhydrology/utils/
+neuralhydrology/__about__.py
+neuralhydrology/__init__.py
+neuralhydrology/nh_run_scheduler.py
+neuralhydrology/nh_run.py
+exp/
+
+# === Hydrology / Climate datasets ===
+*.nc
+*.zarr
+*.h5
+*.hdf5
+*.grib
+*.grb
+*.bin
+*.tar
+*.zip
+
+# === Logs and outputs ===
+logs/
+runs/
+outputs/
+*.out
+*.err
+
+# === Checkpoints / models ===
+*.pth
+*.pt
+*.ckpt
+checkpoints/
+
+# === Python cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# === VS Code / IDE files ===
+.vscode/
+.idea/
+
+# === Environment files ===
+.env
+*.ipynb_checkpoints
+*.DS_Store
+
+# === Conda / virtualenv ===
+.venv/
+env/
+venv/
+*.egg-info/
+
+# === Jupyter notebook temp ===
+*.nbconvert.ipynb
