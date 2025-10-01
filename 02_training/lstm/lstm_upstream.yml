@@ -6,9 +6,9 @@ experiment_name: lstm_test
 run_dir: exp/lstm
 
 # files to specify training, validation and test basins (relative to code root or absolute path)
-train_basin_file: data1/splits/basins_train.txt
-validation_basin_file: data1/splits/basins_val.txt
-test_basin_file: data1/splits/basins_test.txt
+# train_basin_file: data/splits/basins_train.txt
+# validation_basin_file: data/splits/basins_val.txt
+# test_basin_file: data/splits/basins_test.txt
 
 # training, validation and test time periods (format = 'dd/mm/yyyy')
 # train_start_date: 1979-10-01
@@ -103,6 +103,7 @@ dynamics_embedding:
 # specify optimizer [Adam]
 optimizer: AdamW
 
+num_workers: 8
 
 # specify loss [MSE, NSE, RMSE]
 loss: MSE
@@ -124,7 +125,7 @@ clip_gradient_norm: 1
 predict_last_n: 1
 
 # Length of the input sequence
-seq_length: 128
+seq_length: 1024
 
 
 # Log the training loss every n steps
@@ -148,7 +149,7 @@ save_validation_results: True
 dataset: nwm3retro
 
 # Path to data set root
-data_dir: data1
+data_dir: data/n5
 
 # Forcing product [daymet, maurer, maurer_extended, nldas, nldas_extended, nldas_hourly]
 # can be either a list of forcings or a single forcing product
@@ -179,8 +180,8 @@ static_attributes:
 
 # --- Miscellaneous configuration ------------------------------------------------------------------
 early_stopping: True  
-patience_early_stopping: 10 
-minimum_epochs_before_early_stopping: 10 
+patience_early_stopping: 2 
+minimum_epochs_before_early_stopping: 3 
 dynamic_learning_rate: True 
 patience_dynamic_learning_rate: 3 
 factor_dynamic_learning_rate: 0.5 

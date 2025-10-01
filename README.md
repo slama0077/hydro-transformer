@@ -10,10 +10,13 @@ Our proof-of-concept evaluates the hypothesis that **using both upstream and dow
 ## Data Organization
 
 All raw and processed data should be stored inside the `data/` folder. The structure is as follows:
-- data/
+- data/n{reach_value} 
 - ├── time_series/ # Contains forcing data files in .nc or .zarr format
 - ├── attributes/ # Contains static attributes CSV for all basins
-- └── basins/ # Contains basin text files (IDs) for training/validation/test
+- └── gages/ # Contains gages text files (IDs) for training/validation/test
+  - ├── `basin_chunk_*.txt` # contains gage chunks for training
+  - ├── `gage_list.txt` # conatins full gage list
+  - ├── `gage_list_clean.txt` # contains cleaned gage list (after removing invalid gages) 
 
 - **`time_series/`**  
   Contains NetCDF or Zarr files with time-series forcing data for upstream–downstream basin pairs.  
@@ -44,6 +47,13 @@ Contains text files listing gauge IDs for training, validation, and testing.
    - `camelsatts.csv`: contains static attributes for each basin.  
 
 ---
+## Environment Setup 
+#### Create conda environment with CUDA 11.8 support
+
+```bash
+conda env create -f environment_cuda11_8.yml
+```
+
 
 ## Preprocessing Workflow
 
@@ -51,28 +61,62 @@ Before training models, the dataset must be preprocessed into a format suitable 
 
 ### Steps
 
-1. **Basin Pair Preprocessing**  
- Run the script:  01_preprocessing/01_basin_pair_preprocessor.py
- This will:  
+1. Download the time-series files and store in data/n{reach_value} 
+
+```bash
+aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value} --recursive --no-sign-request
+```
+
+2. **Basin Pair Preprocessing**  
+ Run the script:  
+ ```bash 
+ python 01_preprocessing/01_basin_pair_preprocessor.py
+ ```
  - Extract downstream–upstream basin pairs from filenames.  
  - Map downstream IDs to CAMELS gages via `camels_link.csv`.  
  - Merge and save static attributes from `camelsatts.csv`.  
  - Rename raw `.nc/.zarr` files from `<downstream>_<upstream>.nc` to `<gage>.nc`.
 
-2. **Correlation Analysis**  
-Perform exploratory checks on relationships between:  
+3. **Create Gages Chunks**
+ Run the script: 
+ ```bash 
+ python 01_preprocessing/02_create_gages_chunks.py
+ ```
+ Resulting files are renamed using the prefix 'basin' to simplify file naming conventions.
+ - Splits `gage_list.txt` into smaller training chunks.
+ - Outputs files like: `gages/basin_chunks_{i}.txt`.
+
+4. **Remove Invalid Gages (after initial; training)**
+ Run the script: 
+  ```bash 
+ python  01_preprocessing/03_remove_invalid_gages.py
+ ```
+ - Removes invalid gage IDs from chunk files.
+ - Recommended after detecting unstable or low-variance gages.
+
+
+5. **Correlation Analysis**  
+ Run the script: 
+  ```bash 
+ python  01_preprocessing/03_correlation_analysis.py
+ ```
+ Perform exploratory checks on relationships between:  
  - **Dynamic variables** (meteorological forcings, streamflow).  
  - **Static attributes** (basin length, area, reach length).  
-Heatmaps are generated to ensure no redundancy or high collinearity dominates inputs.
+ Generates heatmaps to detect redundancy or strong collinearity.
 
-3. **Model Training with NeuralHydrology**  
-After preprocessing, data can be used with the [NeuralHydrology](https://neuralhydrology.github.io/) framework.  
-- Configure experiment files (`.yml`) to specify:  
+6. **Model Training with NeuralHydrology**  
+After preprocessing, data can be used with the [NeuralHydrology](https://github.com/neuralhydrology/neuralhydrology) framework.  
+- Configure experiment files (`02_training/{model}/*.yml`) to specify:  
   - Training/validation/test basins.  
-  - Input variables (static and dynamic).  
-  - Model type (`transformer`).  
+  - Input variables (static and dynamic). 
+  - Output (predicted streamflow at upstream gage) 
+  - Model type (`transformer` or `lstm`).  
   - Hyperparameters (sequence length, layers, heads, feedforward dimensions, etc.).  
 
+7. **Training the model**
+Run the script: `train.py`
+This will start training... look below for example useage.
 ---
 
 ## Model Concept
@@ -104,9 +148,15 @@ python 01_preprocessing/correlation_analysis.py
 ### Step 3. Train Model with NeuralHydrology
 
 ```bash
-python -m neuralhydrology train --config configs/transformer.yml
+python train.py 02_training/transformer/transformer_combined.yml #training in chunks
+```
+
+```bash
+python train.py 02_training/transformer/transformer_upstream.yml --mode all --gage-file data/gage_list_clean.txt --epochs 3 #train all gages, specifying the number of epochs
 ```
 
 Citation
+If you wnat to use this repository, please cite as:
 
-"..."
+`"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungaged Basins Using Large-Scale Hydrologic Simulations"`
+

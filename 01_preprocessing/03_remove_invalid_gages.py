@@ -21,7 +21,7 @@
 #  '11141280', '12115000', '14139800', '14185900']
 #
 # - Input:
-#   * Folder: ../data/gages
+#   * Folder: ../data/n{reach_value}/gages
 #   * Files: basin_chunk_000.txt through basin_chunk_004.txt
 #   * Each file contains one gage ID per line (8-digit strings).
 #   * A predefined list of invalid gage IDs to be removed.
@@ -41,7 +41,7 @@
 from pathlib import Path
 
 # Folder containing the basin_chunk files
-chunk_dir = Path("../data/gages")
+chunk_dir = Path("../data/n5/gages")
 
 # Invalid gages (zero-padded to 8 digits)
 invalid_gages = {
@@ -64,7 +64,7 @@ for i in range(5):
     with fpath.open() as f:
         gages = [line.strip() for line in f if line.strip()]
 
-    # Normalize to 8-digit strings
+    # Normalize to 8-digit stringsRun the script:  01_preprocessing/01_basin_pair_preprocessor.py
     gages = [g.zfill(8) for g in gages]
 
     # Filter out invalid gages

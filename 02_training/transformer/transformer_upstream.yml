@@ -40,7 +40,7 @@ device: cuda:0
 validate_every: 1
 
 # specify how many random basins to use for validation
-validate_n_random_basins: 
+validate_n_random_basins: 20
 
 # By default, validation is cached (even is this argument is empty). Set to False, if you do not want to use it.
 cache_validation_data: True
@@ -109,7 +109,7 @@ dynamics_embedding:
 # ----> Transformer settings <----
 
 # number of layers in transformer encoding:
-transformer_nlayers: 2
+transformer_nlayers: 4
 
 # type of positional encoding (sum or concatenate)
 transformer_positional_encoding_type: sum
@@ -124,7 +124,7 @@ transformer_positional_dropout: 0.1
 transformer_dropout: 0.1
 
 # number of transformer heads
-transformer_nheads: 4
+transformer_nheads: 8
 
 # ----> General settings <----
 
@@ -136,6 +136,7 @@ hidden_size: 256
 # specify optimizer [Adam]
 optimizer: AdamW
 
+num_workers: 8
 
 # specify loss [MSE, NSE, RMSE]
 loss: MSE

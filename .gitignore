@@ -1,18 +1,19 @@
 # === Project-specific ignores ===
-data/time_series/
-toakinrele/.conda/
-neuralhydrology/
-neuralhydrology/datasetzoo/
-neuralhydrology/datautils/
-neuralhydrology/evaluation/
-neuralhydrology/modelzoo/
-neuralhydrology/training/
-neuralhydrology/utils/
-neuralhydrology/__about__.py
-neuralhydrology/__init__.py
-neuralhydrology/nh_run_scheduler.py
-neuralhydrology/nh_run.py
+data/n5/time_series/
+toakinrele/*
+# neuralhydrology/
+# neuralhydrology/datasetzoo/
+# neuralhydrology/datautils/
+# neuralhydrology/evaluation/
+# neuralhydrology/modelzoo/
+# neuralhydrology/training/
+# neuralhydrology/utils/
+# neuralhydrology/__about__.py
+# neuralhydrology/__init__.py
+# neuralhydrology/nh_run_scheduler.py
+# neuralhydrology/nh_run.py
 exp/
+run_train_parallel.slurm
 
 # === Hydrology / Climate datasets ===
 *.nc

@@ -1,7 +1,7 @@
 """
 This script does an end-to-end utility for basin pair preprocessing:
 
-- Scan ../data/time_series for NetCDF files named <downstream>_<upstream>.nc
+- Scan ../data/n{reach_value}/time_series for NetCDF files named <downstream>_<upstream>.nc
 - Extract downstream and upstream IDs into basin pairs
 - Join each downstream ID to its CAMELS gage ID via ../data/camels_link.csv
 - Write to output/basin_pair_with_gages.csv
@@ -14,7 +14,7 @@ This script does an end-to-end utility for basin pair preprocessing:
 Inputs
 ------
 - Pair discovery:
-    Folder: ../data/time_series
+    Folder: ../data/n{reach_value}/time_series
     Files: *.nc named as <downstream>_<upstream>.nc
 - Gage link table:
     ../data/camels_link.csv with columns:
@@ -26,8 +26,9 @@ Inputs
 Outputs
 -------
 - output/basin_pair_with_gages.csv
-- ../data/attributes/static_attributes.csv
-- Renamed files in ../data/time_series (optional)
+- ../data/n{reach_value}/attributes/static_attributes.csv
+- ../data/n{reach_value}/gage_list.txt
+- Renamed files in ../data/n{reach_value}/time_series
     Before: <downstream>_<upstream>.nc
     After:  <gage>.nc
 
@@ -193,17 +194,17 @@ def rename_nc_files(ts_dir: Path, pairs_with_gage_df: pd.DataFrame, dry_run: boo
 
 def main():
     parser = argparse.ArgumentParser(description="End-to-end basin pair pipeline.")
-    parser.add_argument("--ts-dir", type=Path, default=Path("../data/time_series"),
+    parser.add_argument("--ts-dir", type=Path, default=Path("../data/n5/time_series"),
                         help="Path to time series directory with *.nc files.")
     parser.add_argument("--link-csv", type=Path, default=Path("../data/camels_link.csv"),
                         help="CSV mapping downstream reach to gage.")
     parser.add_argument("--pairs-out", type=Path, default=Path("output/basin_pair_with_gages.csv"),
                         help="Output CSV for basin pairs with gages.")
-    parser.add_argument("--gages-txt", type=Path, default=Path("../data/gage_list.txt"),
+    parser.add_argument("--gages-txt", type=Path, default=Path("../data/n5/gage_list.txt"),
                         help="Output TXT file with one gage per line.")
     parser.add_argument("--atts-csv", type=Path, default=Path("../data/camelsatts.csv"),
                         help="CSV with basin attributes.")
-    parser.add_argument("--static-out", type=Path, default=Path("../data/attributes/static_attributes.csv"),
+    parser.add_argument("--static-out", type=Path, default=Path("../data/n5/attributes/static_attributes.csv"),
                         help="Output CSV for static attributes.")
     parser.add_argument("--skip-rename", action="store_true",
                         help="Skip renaming NetCDF files.")

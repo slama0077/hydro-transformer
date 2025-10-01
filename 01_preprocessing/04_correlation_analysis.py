@@ -1,16 +1,16 @@
 """
 This script
-- Scans ../data/time_series for NetCDF files and loads the first file found.
+- Scans ../data/{reach_value}/time_series for NetCDF files and loads the first file found.
    - Computes correlations among dynamic variables (e.g., meteorological forcings, streamflow).
    - Saves heatmap as correlation_matrix.png
-- Loads ../data/attributes/static_attributes.csv
+- Loads ../data/{reach_value}/attributes/static_attributes.csv
    - Computes correlations among numeric static attributes (e.g., basin length, area).
    - Saves heatmap as static_attributes_correlation.png
 
 Inputs
 ------
-- Folder: ../data/time_series/*.nc (first file used)
-- File: ../data/attributes/static_attributes.csv
+- Folder: ../data/{reach_value}/time_series/*.nc (first file used)
+- File: ../data/{reach_value}/attributes/static_attributes.csv
 
 Outputs
 -------
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 # Dynamic inputs correlation
-ts_dir = Path("../data/time_series")
+ts_dir = Path("../data/n5/time_series") # edit this
 nc_files = sorted(ts_dir.glob("*.nc"))
 
 if not nc_files:
@@ -59,7 +59,7 @@ plt.close()
 print("Saved dynamic correlation heatmap as correlation_matrix.png")
 
 # Static attributes correlation
-static_file = Path("../data/attributes/static_attributes.csv")
+static_file = Path("../data/n5/attributes/static_attributes.csv")
 df_static = pd.read_csv(static_file)
 
 # Drop non-numeric (like gage ID) and NaNs
