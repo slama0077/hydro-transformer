@@ -70,20 +70,17 @@ Contains text files listing gauge IDs for training, validation, and testing.
 - latL: latitude
 
 #### Meteorological Forcing
-- TMP_2maboveground:
-- APCP_surface:
-- VGRD_10maboveground:
-- PRES_surface:
-- DSWRF_surface:
-- DLWRF_surface:
-- UGRD_10maboveground:
+- TMP_2maboveground: Temperature at 2 meters above ground (K)
+- APCP_surface: Total precipitation at surface (Accumulated Precipitation) (mm/s)
+- VGRD_10maboveground: V-component of wind at 10 m above ground (m/s)
+- PRES_surface: Surface pressure (Pa)
+- DSWRF_surface: Downward Shortwave Radiation Flux at surface (W/m^2)
+- DLWRF_surface: Downward Longwave Radiation Flux at surface (W/m^2)
+- UGRD_10maboveground: U-component of wind at 10 m above ground (m/s)
 
 ## Output
 - Predicted streamflow at the upstream gage.  
-  - streamflow:
-
-**Hypothesis:**  
-  - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.
+  - streamflow: River flow (m^3/s)
 
 ---
 ## Environment Setup 
@@ -158,7 +155,7 @@ python 01_preprocessing/02_extract_static_attributes.py
 
 7. **Model Training with NeuralHydrology**  
 After preprocessing, data can be used with the [NeuralHydrology](https://github.com/neuralhydrology/neuralhydrology) framework.  
-- Configure experiment files (`02_training/{model}/*.yml`) to specify:  
+- Configure experiment files (`02_train_configs/{model}/*.yml`) to specify:  
   - Training/validation/test basins.  
   - Input variables (static and dynamic). 
   - Output (predicted streamflow at upstream gage) 
@@ -170,32 +167,19 @@ Run the script: `neuralhydrology_py/train.py`
 This will start training... look below for example useage.---
 
 ---
-## Model Concept
+### Example Usage
 
-- **Inputs:**  
-  - Downstream and upstream forcing variables (combined).  
-  - Static attributes for each basin.  
-
-- **Outputs:**  
-  - Predicted streamflow at the upstream gage.  
-
-- **Hypothesis:**  
-  - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.  
-
----
-## Example Usage
-
-### Step 1. Preprocess Basin Pairs
+##### Step 1. Preprocess Basin Pairs
 ```bash 
 python 01_preprocessing/01_basin_pair_preprocessor.py
 ```
 
-### Step 2. Run Correlation Analysis
+##### Step 2. Run Correlation Analysis
 ```bash
 python 01_preprocessing/correlation_analysis.py
 ```
 
-### Step 3. Train Model with NeuralHydrology
+##### Step 3. Train Model with NeuralHydrology
 
 ```bash
 python train.py 02_train_configs/transformer/transformer_combined.yml #training in chunks
@@ -211,7 +195,7 @@ sbatch run_train.slurm
 ```
 
 ---
-### Citation
+##### Citation
 If you wnat to use this repository, please cite as:
 
 `"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungauged Basins Using Large-Scale Hydrologic Simulations"`
