@@ -1,9 +1,10 @@
 # --- Experiment configurations --------------------------------------------------------------------
 
 # experiment name, used as folder name
-experiment_name: lstm_test
+experiment_name: transformer_test
 
-run_dir: exp/lstm
+# place to store run directory (if empty runs are stored in code_dir/runs/)
+run_dir: exp/transformer
 
 # files to specify training, validation and test basins (relative to code root or absolute path)
 # train_basin_file: data/splits/basins_train.txt
@@ -11,27 +12,26 @@ run_dir: exp/lstm
 # test_basin_file: data/splits/basins_test.txt
 
 # training, validation and test time periods (format = 'dd/mm/yyyy')
-# train_start_date: 1979-10-01
-# train_end_date: 2023-02-01
-
-# validation_start_date: 1979-10-01
-# validation_end_date: 2023-02-01
-
-# test_start_date: 1979-10-01
-# test_end_date: 2023-02-01
-
-
-train_start_date: 1979-10-01
+train_start_date: 1979-02-01
 train_end_date: 2007-12-30
 
 validation_start_date: 2008-01-01
 validation_end_date: 2015-12-30
 
 test_start_date: 2016-01-01
-test_end_date: 2023-02-01
+test_end_date: 2023-01-01
 
 
-# which GPU (id) to use [in format of cuda:0, cuda:1 etc, or cpu, mps or lsNone]
+
+# if you want to use different (continuous or split) periods per basin (and period) define path to pickle files here.
+per_basin_train_periods_file: 
+per_basin_validation_periods_file: 
+per_basin_test_periods_file: 
+
+# fixed seed, leave empty to use a random seed
+seed: 483593
+
+# which GPU (id) to use [in format of cuda:0, cuda:1 etc, or cpu or None]
 device: cuda:0
 
 # --- Validation configuration ---------------------------------------------------------------------
@@ -40,7 +40,10 @@ device: cuda:0
 validate_every: 1
 
 # specify how many random basins to use for validation
-validate_n_random_basins: 20
+validate_n_random_basins: 
+
+# By default, validation is cached (even is this argument is empty). Set to False, if you do not want to use it.
+cache_validation_data: True
 
 # specify which metrics to calculate during validation (see neuralhydrology.evaluation.metrics)
 # this can either be a list or a dictionary. If a dictionary is used, the inner keys must match the name of the
@@ -55,9 +58,10 @@ metrics:
 - Pearson-r
 
 # --- Model configuration --------------------------------------------------------------------------
+model: transformer
 
-# base model type [lstm, ealstm, cudalstm, embcudalstm, mtslstm]
-model: modifiedcudalstm
+# path to weight file that should be used as initial weights. Leave empty to start from random weights
+checkpoint_path:
 
 # prediction head [regression]. Define the head specific parameters below
 head: regression
@@ -65,18 +69,9 @@ head: regression
 # ----> Regression settings <----
 output_activation: linear
 
-# ----> General settings <----
-
-# Number of cell states of the LSTM
-hidden_size: 64
-
-# Initial bias value of the forget gate
-initial_forget_bias: 3
-
-# Dropout applied to the output of the LSTM
-output_dropout: 0.4
-
 # ----> Embedding network settings <----
+
+# define embedding network for static inputs
 # statics_embedding:
 #   type: fc
 #   # define number of neurons per layer in the FC network used as embedding network
@@ -88,46 +83,90 @@ output_dropout: 0.4
 #   # dropout applied to embedding network
 #   dropout: 0.2
 
+statics_embedding:
+  type: fc
+  # define number of neurons per layer in the FC network used as embedding network
+  hiddens:
+    - 32
+    - 64
+  # activation function of embedding network
+  activation: tanh
+  # dropout applied to embedding network
+  dropout: 0.1
+
 # define embedding network for dynamic inputs
 dynamics_embedding:
   type: fc
   # define number of neurons per layer in the FC network used as embedding network
   hiddens:
     - 64
-    # - 128
+    - 128
   # activation function of embedding network
   activation: tanh
   # dropout applied to embedding network
-  dropout: 0.2
+  dropout: 0.1
 
+# ----> Transformer settings <----
+
+transformer_nlayers: 4
+
+# type of positional encoding (sum or concatenate)
+transformer_positional_encoding_type: sum
+
+# dimension of feedforward in each encoding layer
+transformer_dim_feedforward: 512 
+
+# dropout applied only to the positional encoding
+transformer_positional_dropout: 0.1
+
+# dropout used in the encoding layers
+transformer_dropout: 0.1
+
+# number of transformer heads
+transformer_nheads: 8
+
+# ----> General settings <----
+
+# Number of cell states of the LSTM
+hidden_size: 256
+
+num_workers: 8
 # --- Training configuration -----------------------------------------------------------------------
 
 # specify optimizer [Adam]
 optimizer: AdamW
 
-num_workers: 8
 
 # specify loss [MSE, NSE, RMSE]
 loss: MSE
 
-# specify learning rates to use starting at specific epochs (0 is the initial learning rate)
 learning_rate: 1e-4
 
 # Mini-batch size
-batch_size: 256
+batch_size: 256 
 
 # Number of training epochs
-epochs: 1
+epochs: 50
+
+# adds noise with given std to the labels during training. Leave empty or set to 0 if not used.
+target_noise_std: 
 
 # If a value, clips the gradients during training to that norm.
 clip_gradient_norm: 1
 
+use_frequencies: 
+- '1D'
+
 # Defines which time steps are used to calculate the loss. Can't be larger than seq_length.
 # If use_frequencies is used, this needs to be a dict mapping each frequency to a predict_last_n-value, else an int.
-predict_last_n: 1
+predict_last_n: 
+  1D: 1
 
 # Length of the input sequence
-seq_length: 1024
+seq_length: 
+  1D: 512
+
+
 
 
 # Log the training loss every n steps
@@ -145,16 +184,18 @@ save_weights_every: 1
 # Store the results of the validation to disk
 save_validation_results: True
 
+
 # --- Data configurations --------------------------------------------------------------------------
 
-# which data set to use [camels_us, camels_gb, global, hourly_camels_us]
+# which data set to use [camels_us, camels_gb, global, hourly_camels_us, camels_cl, generic]
 dataset: nwm3retro
 
 # Path to data set root
-data_dir: data/n5
+data_dir: data
 
-# Forcing product [daymet, maurer, maurer_extended, nldas, nldas_extended, nldas_hourly]
-# can be either a list of forcings or a single forcing product
+# Set to True, if train data file should be save to disk. If empty or False, train data is not saved.
+save_train_data: False
+
 dynamic_inputs:
 - UGRD_10maboveground_d
 - TMP_2maboveground_d
@@ -189,11 +230,11 @@ static_attributes:
 - reach_length_d
 
 
-
 # --- Miscellaneous configuration ------------------------------------------------------------------
-early_stopping: True  
-patience_early_stopping: 2 
-minimum_epochs_before_early_stopping: 3 
+early_stopping: True   
+patience_early_stopping: 5 
+minimum_epochs_before_early_stopping: 10 
 dynamic_learning_rate: True 
 patience_dynamic_learning_rate: 3 
 factor_dynamic_learning_rate: 0.5 
+

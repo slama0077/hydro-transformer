@@ -5,10 +5,7 @@ This script does an end-to-end utility for basin pair preprocessing:
 - Extract downstream and upstream IDs into basin pairs
 - Join each downstream ID to its CAMELS gage ID via ../data/camels_link.csv
 - Write to output/basin_pair_with_gages.csv
-- Load ../data/camelsatts.csv and merge downstream and upstream attributes
-   - Outputs ../data/attributes/static_attributes.csv with columns:
-     gage, basin_length_d, basin_area_d, reach_length_d,
-     basin_length_u, basin_area_u, reach_length_u
+- Write ../data/n{reach_value}/gage_list.txt
 - Rename the NetCDF files from <downstream>_<upstream>.nc to <gage>.nc
 
 Inputs
@@ -19,14 +16,10 @@ Inputs
 - Gage link table:
     ../data/camels_link.csv with columns:
       to (int-like downstream reach ID), gages (string or bytes-like gage)
-- Attributes:
-    ../data/camelsatts.csv with columns:
-      id, basin_length, basin_area, reach_length
 
 Outputs
 -------
-- output/basin_pair_with_gages.csv
-- ../data/n{reach_value}/attributes/static_attributes.csv
+- ../data/n{reach_value}/basin_pair_with_gages.csv
 - ../data/n{reach_value}/gage_list.txt
 - Renamed files in ../data/n{reach_value}/time_series
     Before: <downstream>_<upstream>.nc
@@ -35,15 +28,14 @@ Outputs
 Usage examples
 --------------
 - Run end-to-end with rename:
-    python pipeline_basin_pairs.py
+    python 01_basin_pair_preprocessor.py --reach-value 10
 
 - Dry run the rename step to preview:
-    python pipeline_basin_pairs.py --dry-run
+    python 01_basin_pair_preprocessor.py --dry-run
 
 - Skip renaming entirely:
-    python pipeline_basin_pairs.py --skip-rename
+    python 01_basin_pair_preprocessor.py --skip-rename
 """
-
 
 from pathlib import Path
 import argparse
@@ -64,7 +56,7 @@ def discover_basin_pairs(ts_dir: Path) -> pd.DataFrame:
 
 
 def load_and_clean_link(link_csv: Path) -> pd.DataFrame:
-    """Load alabama_link.csv and extract clean numeric gage strings with leading zeros preserved."""
+    """Load camels_link.csv and extract clean numeric gage strings with leading zeros preserved."""
     link_df = pd.read_csv(link_csv)
     link_df["to"] = link_df["to"].astype(int)
     # Extract only digits from gages, handle b'01234567' or "01234567"
@@ -89,6 +81,7 @@ def merge_pairs_with_gages(pairs_df: pd.DataFrame, link_df: pd.DataFrame) -> pd.
     with_gage = merged[merged["gage"].notna()].copy()
     with_gage["gage"] = with_gage["gage"].astype(str)
     return with_gage[["downstream", "upstream", "gage"]]
+
 
 def save_gage_lists(pairs_csv: Path,
                     out_txt: Path = Path("output/gage_list.txt"),
@@ -115,52 +108,6 @@ def save_gage_lists(pairs_csv: Path,
 
     print(f"Saved {len(unique_gages)} unique gages to {out_txt}")
     return unique_gages
-
-
-def build_static_attributes(basin_pairs_with_gage_csv: Path,
-                            atts_csv: Path,
-                            out_static_csv: Path) -> pd.DataFrame:
-    """Merge downstream and upstream attributes and write static_attributes.csv."""
-    atts_df = pd.read_csv(atts_csv, dtype={"id": str})
-    crosswalk_df = pd.read_csv(basin_pairs_with_gage_csv,
-                               dtype={"gage": str, "downstream": str, "upstream": str})
-
-    down_attrs = atts_df.rename(columns={
-        "id": "downstream",
-        "basin_length": "basin_length_d",
-        "basin_area": "basin_area_d",
-        "reach_length": "reach_length_d"
-    })
-    merged = crosswalk_df.merge(down_attrs, on="downstream", how="left")
-
-    up_attrs = atts_df.rename(columns={
-        "id": "upstream",
-        "basin_length": "basin_length_u",
-        "basin_area": "basin_area_u",
-        "reach_length": "reach_length_u"
-    })
-    merged = merged.merge(up_attrs, on="upstream", how="left")
-
-    static_attributes = merged[[
-        "gage",
-        "basin_length_d", "basin_area_d", "reach_length_d",
-        "basin_length_u", "basin_area_u", "reach_length_u"
-    ]].drop_duplicates()
-
-    out_static_csv.parent.mkdir(parents=True, exist_ok=True)
-    static_attributes.to_csv(out_static_csv, index=False)
-    print(f"Saved {len(static_attributes)} unique gage records to {out_static_csv}")
-
-    # Duplicate checks
-    df_check = pd.read_csv(out_static_csv, dtype={"gage": str})
-    dup_cols = df_check.columns[df_check.columns.duplicated()].tolist()
-    print("Duplicate columns:", dup_cols)
-    dup_ids = df_check[df_check.duplicated(subset=["gage"], keep=False)]
-    print("Number of duplicate gage IDs:", dup_ids["gage"].nunique())
-    if not dup_ids.empty:
-        print("Examples of duplicate gages:\n", dup_ids.head())
-
-    return static_attributes
 
 
 def rename_nc_files(ts_dir: Path, pairs_with_gage_df: pd.DataFrame, dry_run: bool = False) -> None:
@@ -194,23 +141,29 @@ def rename_nc_files(ts_dir: Path, pairs_with_gage_df: pd.DataFrame, dry_run: boo
 
 def main():
     parser = argparse.ArgumentParser(description="End-to-end basin pair pipeline.")
-    parser.add_argument("--ts-dir", type=Path, default=Path("../data/n5/time_series"),
-                        help="Path to time series directory with *.nc files.")
-    parser.add_argument("--link-csv", type=Path, default=Path("../data/camels_link.csv"),
+
+    # reach value decides which nXX folder to use
+    parser.add_argument("--reach-value", type=int, default=10,
+                        help="Reach value used to build data paths (e.g., 10 for n10).")
+
+    parser.add_argument("--link-csv", type=Path, default=Path("data/camels_link.csv"),
                         help="CSV mapping downstream reach to gage.")
-    parser.add_argument("--pairs-out", type=Path, default=Path("output/basin_pair_with_gages.csv"),
-                        help="Output CSV for basin pairs with gages.")
-    parser.add_argument("--gages-txt", type=Path, default=Path("../data/n5/gage_list.txt"),
-                        help="Output TXT file with one gage per line.")
-    parser.add_argument("--atts-csv", type=Path, default=Path("../data/camelsatts.csv"),
+    parser.add_argument("--atts-csv", type=Path, default=Path("data/camelsatts.csv"),
                         help="CSV with basin attributes.")
-    parser.add_argument("--static-out", type=Path, default=Path("../data/n5/attributes/static_attributes.csv"),
-                        help="Output CSV for static attributes.")
     parser.add_argument("--skip-rename", action="store_true",
                         help="Skip renaming NetCDF files.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print planned renames without changing files.")
     args = parser.parse_args()
+
+    # derive paths from reach-value
+    base_dir = Path(f"data/n{args.reach_value}")
+    args.ts_dir    = base_dir / "time_series"
+    args.gages_txt = base_dir / "gage_list.txt"
+    args.pairs_out = base_dir / "basin_pair_with_gages.csv"
+
+    # ensure dirs exist
+    args.ts_dir.mkdir(parents=True, exist_ok=True)
 
     # Discover basin pairs from filenames
     print("Discovering basin pairs from filenames...")
@@ -233,10 +186,6 @@ def main():
     # Save gage lists
     print("Building gage lists...")
     save_gage_lists(args.pairs_out, args.gages_txt, zero_pad=True)
-
-    # Build static attributes
-    print("Building static attributes...")
-    build_static_attributes(args.pairs_out, args.atts_csv, args.static_out)
 
     # Rename files
     if not args.skip_rename:

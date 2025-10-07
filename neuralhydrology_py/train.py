@@ -67,11 +67,11 @@ def main():
     parser.add_argument("--epochs", type=int, default=1, help="Epochs per run (per chunk in chunk mode).")
     parser.add_argument("--exp-dir", type=Path, default=Path("exp/transformer"),
                         help="Experiment base output directory.")
-    parser.add_argument("--chunk-dir", type=Path, default=Path("data/gages"),
+    parser.add_argument("--chunk-dir", type=Path, default=Path("data/n5/gages"),
                         help="Directory containing basin_chunk_*.txt files (chunk mode).")
     parser.add_argument("--chunk-pattern", type=str, default="basin_chunk_*.txt",
                         help="Glob pattern for chunk files inside --chunk-dir.")
-    parser.add_argument("--gage-file", type=Path, default=Path("data/gage_list_clean.txt"),
+    parser.add_argument("--gage-file", type=Path, default=Path("data/n5/gages/gage_list_clean.txt"),
                         help="Whole gage list file (all mode).")
     parser.add_argument("--resume-chain", action="store_true",
                         help="In chunk mode, resume each chunk from the previous chunk’s final checkpoint.")

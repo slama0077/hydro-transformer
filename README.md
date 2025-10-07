@@ -39,6 +39,7 @@ Contains text files listing gauge IDs for training, validation, and testing.
 1. **Retrospective National Water Model (NWM)**  
  - Provides multi-decadal hydrologic simulations (precipitation, temperature, humidity, pressure, radiation, streamflow, etc.).  
  - Used to generate dynamic forcing inputs.
+ - Used to generate static attributes.
 
 2. **CAMELS Dataset**  
  - Provides static attributes and metadata for basins across the U.S.  
@@ -64,7 +65,7 @@ Before training models, the dataset must be preprocessed into a format suitable 
 1. Download the time-series files and store in data/n{reach_value} 
 
 ```bash
-aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value} --recursive --no-sign-request
+aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value}/time_series --recursive --no-sign-request
 ```
 
 2. **Basin Pair Preprocessing**  
@@ -73,20 +74,27 @@ aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value} --recurs
  python 01_preprocessing/01_basin_pair_preprocessor.py
  ```
  - Extract downstream–upstream basin pairs from filenames.  
- - Map downstream IDs to CAMELS gages via `camels_link.csv`.  
- - Merge and save static attributes from `camelsatts.csv`.  
- - Rename raw `.nc/.zarr` files from `<downstream>_<upstream>.nc` to `<gage>.nc`.
+ - Rename raw files from `<downstream>_<upstream>.nc` to `<gage>.nc`.
 
-3. **Create Gages Chunks**
+3. **Extract Static Attributes**
+Run the script:
+```bash
+python 01_preprocessing/02_extract_static_attributes.py
+```
+ - Map downstream IDs to CAMELS gages via `data/camels_link.csv`.  
+ - Merge and save static attributes from `data/nwm_attributes.csv`.  
+
+4. **Create Gages Chunks** -- Optional
  Run the script: 
  ```bash 
- python 01_preprocessing/02_create_gages_chunks.py
+ python 01_preprocessing/03_create_gages_chunks.py
  ```
  Resulting files are renamed using the prefix 'basin' to simplify file naming conventions.
  - Splits `gage_list.txt` into smaller training chunks.
  - Outputs files like: `gages/basin_chunks_{i}.txt`.
+ **Note: Use this option if you plan to train on hourly data, since training across all gages at this resolution will require significantly more time.**
 
-4. **Remove Invalid Gages (after initial; training)**
+5. **Remove Invalid Gages (after initial; training)**
  Run the script: 
   ```bash 
  python  01_preprocessing/03_remove_invalid_gages.py
@@ -94,8 +102,13 @@ aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value} --recurs
  - Removes invalid gage IDs from chunk files.
  - Recommended after detecting unstable or low-variance gages.
 
+ Can also run:
+ ```bash
+ python 02_train_configs/01_clean_gage_list.py
+ ```
+ - Removes invalid gage IDs from whole gage_list file.
 
-5. **Correlation Analysis**  
+6. **Correlation Analysis**  
  Run the script: 
   ```bash 
  python  01_preprocessing/03_correlation_analysis.py
@@ -105,7 +118,7 @@ aws s3 cp s3://camels-nwm-reanalysis/n{reach_value}/ data/{reach_value} --recurs
  - **Static attributes** (basin length, area, reach length).  
  Generates heatmaps to detect redundancy or strong collinearity.
 
-6. **Model Training with NeuralHydrology**  
+7. **Model Training with NeuralHydrology**  
 After preprocessing, data can be used with the [NeuralHydrology](https://github.com/neuralhydrology/neuralhydrology) framework.  
 - Configure experiment files (`02_training/{model}/*.yml`) to specify:  
   - Training/validation/test basins.  
@@ -115,21 +128,21 @@ After preprocessing, data can be used with the [NeuralHydrology](https://github.
   - Hyperparameters (sequence length, layers, heads, feedforward dimensions, etc.).  
 
 7. **Training the model**
-Run the script: `train.py`
+Run the script: `neuralhydrology_py/train.py`
 This will start training... look below for example useage.
 ---
 
 ## Model Concept
 
 - **Inputs:**  
- - Downstream and upstream forcing variables (combined).  
- - Static attributes for each basin.  
+  - Downstream and upstream forcing variables (combined).  
+  - Static attributes for each basin.  
 
 - **Outputs:**  
- - Predicted streamflow at the upstream gage.  
+  - Predicted streamflow at the upstream gage.  
 
 - **Hypothesis:**  
- - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.  
+  - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.  
 
 ---
 
@@ -148,15 +161,21 @@ python 01_preprocessing/correlation_analysis.py
 ### Step 3. Train Model with NeuralHydrology
 
 ```bash
-python train.py 02_training/transformer/transformer_combined.yml #training in chunks
+python train.py 02_train_configs/transformer/transformer_combined.yml #training in chunks
 ```
 
 ```bash
-python train.py 02_training/transformer/transformer_upstream.yml --mode all --gage-file data/gage_list_clean.txt --epochs 3 #train all gages, specifying the number of epochs
+python train.py 02_train_configs/transformer/transformer_upstream.yml --mode all --gage-file data/gage_list_clean.txt --epochs 3 #train all gages, specifying the number of epochs
 ```
 
-Citation
+OR using slurm run (will run on all gage list)
+```bash
+sbatch run_train.slurm
+```
+
+
+### Citation
 If you wnat to use this repository, please cite as:
 
-`"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungaged Basins Using Large-Scale Hydrologic Simulations"`
+`"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungauged Basins Using Large-Scale Hydrologic Simulations"`
 

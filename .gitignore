@@ -1,5 +1,5 @@
 # === Project-specific ignores ===
-data/n5/time_series/
+data/**/time_series/
 toakinrele/*
 # neuralhydrology/
 # neuralhydrology/datasetzoo/

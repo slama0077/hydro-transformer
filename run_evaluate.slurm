@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=lch1 # edit as needed
+#SBATCH --job-name=test_lu1 # eidt as needed
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=3
+#SBATCH --cpus-per-task=5
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:v100:1
 #SBATCH --time=11:59:00
@@ -36,15 +36,11 @@ print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else No
 PY
 
 # Paths - edit as needed
-CONFIG="02_training/lstm/lstm_combined.yml"
 GAGE_FILE="data/n5/gages/gage_list_clean.txt"
-EXP_DIR="exp/lstm"
+RUN_DIR="exp/lstm/lstm_upstream_0610_1140026"
 
 
-# Train one model on the full gage list
-python neuralhydrology_py/train.py "${CONFIG}" \
-  --mode all \
+# Evaluate model on the full gage list
+python neuralhydrology_py/evaluate.py \
   --gage-file "${GAGE_FILE}" \
-  --epochs 1 \
-  --exp-dir "${EXP_DIR}" \
-  --device cuda:0
+  --run-dir "${RUN_DIR}"
