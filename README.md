@@ -33,7 +33,6 @@ All raw and processed data should be stored inside the `data/` folder. The struc
 Contains text files listing gauge IDs for training, validation, and testing.  
 
 ---
-
 ## Supporting Datasets
 
 1. **Retrospective National Water Model (NWM)**  
@@ -48,6 +47,45 @@ Contains text files listing gauge IDs for training, validation, and testing.
    - `camelsatts.csv`: contains static attributes for each basin.  
 
 ---
+## Inputs
+ - Downstream and upstream forcing variables (combined).  
+ - Static attributes for each basin.  
+ 
+#### Catchment Attributes
+- Contributing_Area: sum of all the contributing area of the reach (units unclear, probably m^2)
+- Shape_Length: length of individual basin (units unclear, probably m)
+- Shape_Area: area of individual basin (units unclear, probably m^2)
+- Reach_Length: length of individual reach (units unclear, probably m)
+- alt: elevation in m
+- order: stream order
+- n: Manning's roughness
+- So: slope in m/m
+- Kchan: channel conductivity in mm/h
+- nCC: compound channel Manning's roughness
+- TopWdth: width of top of channel in m
+- TopWdthCC: compound channel top width in m
+- ChSlp: channel side slope
+- BtmWdth: width of bottom of channel in m
+- lon: longitude
+- latL: latitude
+
+#### Meteorological Forcing
+- TMP_2maboveground:
+- APCP_surface:
+- VGRD_10maboveground:
+- PRES_surface:
+- DSWRF_surface:
+- DLWRF_surface:
+- UGRD_10maboveground:
+
+## Output
+- Predicted streamflow at the upstream gage.  
+  - streamflow:
+
+**Hypothesis:**  
+  - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.
+
+---
 ## Environment Setup 
 #### Create conda environment with CUDA 11.8 support
 
@@ -55,7 +93,7 @@ Contains text files listing gauge IDs for training, validation, and testing.
 conda env create -f environment_cuda11_8.yml
 ```
 
-
+---
 ## Preprocessing Workflow
 
 Before training models, the dataset must be preprocessed into a format suitable for NeuralHydrology.
@@ -127,11 +165,11 @@ After preprocessing, data can be used with the [NeuralHydrology](https://github.
   - Model type (`transformer` or `lstm`).  
   - Hyperparameters (sequence length, layers, heads, feedforward dimensions, etc.).  
 
-7. **Training the model**
+8. **Training the model**
 Run the script: `neuralhydrology_py/train.py`
-This will start training... look below for example useage.
----
+This will start training... look below for example useage.---
 
+---
 ## Model Concept
 
 - **Inputs:**  
@@ -145,7 +183,6 @@ This will start training... look below for example useage.
   - A combined downstream–upstream input model will **outperform upstream-only models** by leveraging integrated hydrological signals.  
 
 ---
-
 ## Example Usage
 
 ### Step 1. Preprocess Basin Pairs
@@ -173,7 +210,7 @@ OR using slurm run (will run on all gage list)
 sbatch run_train.slurm
 ```
 
-
+---
 ### Citation
 If you wnat to use this repository, please cite as:
 
