@@ -1,6 +1,7 @@
 # === Project-specific ignores ===
 data/**/time_series/
 toakinrele/*
+data/nwm_attributes.csv
 # neuralhydrology/
 # neuralhydrology/datasetzoo/
 # neuralhydrology/datautils/
