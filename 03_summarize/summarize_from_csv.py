@@ -1,7 +1,9 @@
 """
 Example usage:
 python summarize_from_csv.py --test test_metrics.csv --val validation_metrics.csv --outdir metrics_out
-python summarize_from_csv.py --test ../exp/lstm/lstm_upstream_0210_200711/test/model_epoch017/test_metrics.csv --val ../exp/lstm/lstm_upstream_0210_200711/validation/model_epoch017/validation_metrics.csv --outdir output
+python summarize_from_csv.py --test ../exp/lstm/lstm_combined_0610_193144/test/model_epoch001/test_metrics.csv --val ../exp/lstm/lstm_combined_0610_193144/validation/model_epoch001/validation_metrics.csv --outdir output
+
+python 03_summarize/summarize_from_csv.py --test exp/lstm/lstm_combined_0610_193144/test/model_epoch001/test_metrics.csv --val exp/lstm/lstm_combined_0610_193144/validation/model_epoch001/validation_metrics.csv --outdir 03_summarize/output/lstm_combined1
 
 """
 

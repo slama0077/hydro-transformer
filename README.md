@@ -170,32 +170,54 @@ This will start training... look below for example useage.---
 ### Example Usage
 
 ##### Step 1. Preprocess Basin Pairs
-```bash 
-python 01_preprocessing/01_basin_pair_preprocessor.py
-```
+  ```bash 
+  python 01_preprocessing/01_basin_pair_preprocessor.py
+  ```
 
-##### Step 2. Run Correlation Analysis
-```bash
-python 01_preprocessing/correlation_analysis.py
-```
+  ##### Step 2. Run Correlation Analysis
+  ```bash
+  python 01_preprocessing/correlation_analysis.py
+  ```
 
 ##### Step 3. Train Model with NeuralHydrology
+  ```bash
+  python neuralhydrology_py/train.py 02_train_configs/transformer/transformer_combined.yml #training in chunks
+  ```
 
-```bash
-python train.py 02_train_configs/transformer/transformer_combined.yml #training in chunks
-```
+  ```bash
+  python neuralhydrology_py/train.py 02_train_configs/transformer/transformer_upstream.yml --mode all --gage-file data/gage_list_clean.txt --epochs 3 #train all gages, specifying the number of epochs
+  ```
 
-```bash
-python train.py 02_train_configs/transformer/transformer_upstream.yml --mode all --gage-file data/gage_list_clean.txt --epochs 3 #train all gages, specifying the number of epochs
-```
+  OR using slurm run: (will run on all gage list)
+  ```bash
+  sbatch run_train.slurm
+  ```
 
-OR using slurm run (will run on all gage list)
-```bash
-sbatch run_train.slurm
-```
+##### Step 4. Evaluate Model with NeuralHydrology
+  ```bash
+  python neuralhydrology_py/evaluate.py --run-dir <path_to_run_directory> --gage-file <path_to_gage_list>
 
+  python neuralhydrology_py/evaluate.py --run-dir exp/lstm/lstm_upstream_0210_122836 --gage-file data/n5/gages/gage_list_clean.txt
+  ```
+  OR using slurm run:
+  ```bash
+  sbatch run_evaluate.slurm
+  ```
+
+##### Step 5. Summarize Results
+  ```bash
+  python 03_summarize/summarize_from_csv.py --test <path_to_test_metrics.csv> --val <path_to_validation_metrics.csv> --outdir <output_dir>
+  ```
+  - compare test and validation results to check if model is overfitting or underfitting
+
+##### Step 6. Evaluate Metrics
+  ```bash
+  python 03_summarize/evaluate_metrics.py --pickle <path_to_test_results.p> --outdir <output_dir>
+  ```
+  - evaluate the model for both mean and median of all metrics **NSE, NNSE, KGE, RMSE, MSE, MAE, Pearson-r**
+  
 ---
-##### Citation
+### Citation
 If you wnat to use this repository, please cite as:
 
 `"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungauged Basins Using Large-Scale Hydrologic Simulations"`

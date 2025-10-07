@@ -37,7 +37,7 @@ PY
 
 # Paths - edit as needed
 GAGE_FILE="data/n5/gages/gage_list_clean.txt"
-RUN_DIR="exp/lstm/lstm_upstream_0610_1140026"
+RUN_DIR="exp/lstm/lstm_upstream_0610_140026"
 
 
 # Evaluate model on the full gage list

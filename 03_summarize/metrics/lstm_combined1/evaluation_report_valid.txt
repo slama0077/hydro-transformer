@@ -1,0 +1,13 @@
+Evaluation Summary — Valid Basins Only
+=====================================
+Total basins: 566
+Low-variance basins removed (std_obs <= 0.01): 49 (8.66%)
+Valid basins kept: 517 (91.34%)
+
+NSE        Mean=-3.2281  Median=0.5761
+NNSE       Mean=0.7102  Median=0.7023
+MSE        Mean=47.5012  Median=0.0373
+RMSE       Mean=1.8764  Median=0.1931
+MAE        Mean=0.4460  Median=0.0615
+KGE        Mean=-0.0312  Median=0.5110
+Pearson-r  Mean=0.7690  Median=0.8343
