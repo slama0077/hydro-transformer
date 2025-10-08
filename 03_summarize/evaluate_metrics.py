@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Evaluate Hydrological Model Test Results (Pickle-based)
 
@@ -47,7 +46,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# ---------------- Argument Parser ----------------
+
 parser = argparse.ArgumentParser(description="Evaluate hydrological model results.")
 parser.add_argument("--pickle", "-p", required=True, help="Path to the input pickle file.")
 parser.add_argument("--outdir", "-o", required=True, help="Directory to save outputs.")
@@ -65,12 +64,12 @@ LOW_VAR_STD_TOL = 0.01
 FIG_DPI = 300
 N_RANDOM_HYDROGRAPHS = 5
 RANDOM_SEED = 152
-# ---------------------------------------------
+
 
 Path(OUTDIR).mkdir(parents=True, exist_ok=True)
 sns.set_theme(style="whitegrid", context="talk")
 
-# ---------- Metric functions ----------
+
 def _to_1d(x): return np.asarray(x, float).ravel()
 
 def nse(y_obs, y_sim):
@@ -115,7 +114,7 @@ def get_time_coord(ds):
             return c
     return None
 
-# ---------- Load pickle and compute ----------
+# Load pickle and compute 
 with open(PICKLE_RESULTS_PATH, "rb") as f:
     results = pickle.load(f)
 
@@ -192,7 +191,7 @@ df = pd.DataFrame(rows)
 if df.empty:
     raise RuntimeError("No basins with usable data were found in the pickle.")
 
-# ---------- Filter only valid basins ----------
+# Filter only valid basins
 df["low_var_flag"] = df["std_obs"] <= LOW_VAR_STD_TOL
 
 n_total = len(df)
@@ -207,11 +206,11 @@ print(f"Total basins: {n_total}")
 print(f"Low-variance basins removed (std_obs <= {LOW_VAR_STD_TOL}): {n_lowvar} ({pct_lowvar:.2f}%)")
 print(f"Valid basins kept: {n_valid} ({pct_valid:.2f}%)")
 
-# ---------- Save valid basins only ----------
+# Save valid basins only
 df_valid.to_csv(Path(OUTDIR) / "valid_basins_metrics.csv", index=False)
 df.loc[df["low_var_flag"]].to_csv(Path(OUTDIR) / "low_variance_basins.csv", index=False)
 
-# ---------- Compute summary (valid only) ----------
+# Compute summary (valid only) 
 metrics = ["NSE", "NNSE", "MSE", "RMSE", "MAE", "KGE", "Pearson-r"]
 summary = pd.DataFrame({
     "Metric": metrics,
@@ -222,7 +221,7 @@ summary = pd.DataFrame({
 summary.to_csv(Path(OUTDIR) / "evaluation_summary_valid.csv", index=False)
 print("Saved evaluation_summary_valid.csv")
 
-# ---------- Violin plot (NSE valid only) ----------
+# Violin plot (NSE valid only)
 sns.violinplot(y=df_valid["NSE"], color="skyblue", inner="box")
 plt.axhline(0, color="k", ls="--", lw=1)
 plt.axhline(0.5, color="gray", ls="--", lw=1)
@@ -233,7 +232,7 @@ plt.tight_layout()
 plt.savefig(Path(OUTDIR) / "fig_nse_violin_valid.png", dpi=FIG_DPI)
 plt.close()
 
-# ---------- Random hydrographs for valid basins ----------
+# Random hydrographs for valid basins
 # Pick basins that we actually have stored time series for
 valid_ids_with_ts = [b for b in df_valid["basin"].tolist() if b in basin_timeseries]
 if valid_ids_with_ts:
@@ -260,7 +259,7 @@ if valid_ids_with_ts:
 else:
     print("No valid basins with available time series to plot hydrographs.")
     
-# ---------- Text summary ----------
+# Text summary
 with open(Path(OUTDIR) / "evaluation_report_valid.txt", "w") as f:
     f.write("Evaluation Summary — Valid Basins Only\n")
     f.write("=====================================\n")

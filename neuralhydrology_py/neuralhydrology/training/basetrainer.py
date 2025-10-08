@@ -449,7 +449,12 @@ class BaseTrainer(object):
             self.cfg.train_dir = self.cfg.run_dir / "train_data"
             self.cfg.train_dir.mkdir(parents=True)
         else:
-            raise RuntimeError(f"There is already a folder at {self.cfg.run_dir}")
+            # raise RuntimeError(f"There is already a folder at {self.cfg.run_dir}")
+            if not getattr(self.cfg, "allow_existing_run_dir", False) and not self.cfg._cfg.get("allow_existing_run_dir", False):
+                raise RuntimeError(f"There is already a folder at {self.cfg.run_dir}")
+            # else: proceed WITHOUT creating, and be aware of overwriting risks
+            self.cfg.train_dir = self.cfg.run_dir / "train_data"
+            self.cfg.train_dir.mkdir(parents=True, exist_ok=True)
 
         if self.cfg.log_n_figures is not None:
             self.cfg.img_log_dir = self.cfg.run_dir / "img_log"

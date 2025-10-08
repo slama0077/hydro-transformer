@@ -1,3 +1,5 @@
+# This script prints out the validation and test metrics (check if model is overfitting and underfitting)
+
 """
 Example usage:
 python summarize_from_csv.py --test test_metrics.csv --val validation_metrics.csv --outdir metrics_out
@@ -7,7 +9,6 @@ python 03_summarize/summarize_from_csv.py --test exp/lstm/lstm_combined_0610_193
 
 """
 
-#!/usr/bin/env python3
 import argparse
 import os
 import pandas as pd
