@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=lu2 # edit as needed
+#SBATCH --job-name=lc2 # edit as needed
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -36,8 +36,8 @@ print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else No
 PY
 
 # Paths - edit as needed
-CONFIG="exp/lstm/lstm_upstream_0710_131354/config.yml"
-RUN_DIR="exp/lstm/lstm_upstream_0710_131354"
+CONFIG="exp/lstm/lstm_combined_0610_193144/config.yml"
+RUN_DIR="exp/lstm/lstm_combined_0610_193144/"
 
 
 # Train one model on the full gage list

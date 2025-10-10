@@ -62,7 +62,7 @@ SIM_VAR = "streamflow_u_sim"
 TIME_COORD_CANDIDATES = ["date", "time", "Time", "datetime"]
 LOW_VAR_STD_TOL = 0.01
 FIG_DPI = 300
-N_RANDOM_HYDROGRAPHS = 5
+N_RANDOM_HYDROGRAPHS = 3
 RANDOM_SEED = 152
 
 
@@ -191,46 +191,58 @@ df = pd.DataFrame(rows)
 if df.empty:
     raise RuntimeError("No basins with usable data were found in the pickle.")
 
-# Filter only valid basins
+# # Filter only valid basins
 df["low_var_flag"] = df["std_obs"] <= LOW_VAR_STD_TOL
+
+# filter only basins with postive NSE
+df["neg_basin_flag"] = df["NSE"] < 0
 
 n_total = len(df)
 df_valid = df.loc[~df["low_var_flag"]].copy()
 n_valid = len(df_valid)
 n_lowvar = n_total - n_valid
 
+
 pct_lowvar = 100 * n_lowvar / n_total if n_total else 0
 pct_valid = 100 * n_valid / n_total if n_total else 0
 
-print(f"Total basins: {n_total}")
-print(f"Low-variance basins removed (std_obs <= {LOW_VAR_STD_TOL}): {n_lowvar} ({pct_lowvar:.2f}%)")
-print(f"Valid basins kept: {n_valid} ({pct_valid:.2f}%)")
 
-# Save valid basins only
-df_valid.to_csv(Path(OUTDIR) / "valid_basins_metrics.csv", index=False)
+df_pos = df.loc[~df['neg_basin_flag']].copy()
+n_neg = n_total - len(df_pos)
+pct_neg = 100 * n_neg / n_total if n_total else 0
+
+
+print(f"Total basins: {n_total}")
+print(f"Low-variance basins (std_obs <= {LOW_VAR_STD_TOL}): {n_lowvar}")
+print(f"Negative basins: {n_neg}")
+print(f"Positive basins: {n_total-n_neg}")
+# print(f"Valid basins: {n_valid}")
+
+# Save valid, lowvar and negative basins
+df_valid.to_csv(Path(OUTDIR) / "normal_var_basins.csv", index=False)
 df.loc[df["low_var_flag"]].to_csv(Path(OUTDIR) / "low_variance_basins.csv", index=False)
+df.loc[df["neg_basin_flag"]].to_csv(Path(OUTDIR) /"negative_NSE_basins", index=False)
 
 # Compute summary (valid only) 
 metrics = ["NSE", "NNSE", "MSE", "RMSE", "MAE", "KGE", "Pearson-r"]
-summary = pd.DataFrame({
-    "Metric": metrics,
-    "Mean": [df_valid[m].mean(skipna=True) for m in metrics],
-    "Median": [df_valid[m].median(skipna=True) for m in metrics],
-    "Count": [df_valid[m].notna().sum() for m in metrics]
-})
-summary.to_csv(Path(OUTDIR) / "evaluation_summary_valid.csv", index=False)
-print("Saved evaluation_summary_valid.csv")
+# summary = pd.DataFrame({
+#     "Metric": metrics,
+#     "Mean": [df_valid[m].mean(skipna=True) for m in metrics],
+#     "Median": [df_valid[m].median(skipna=True) for m in metrics],
+#     "Count": [df_valid[m].notna().sum() for m in metrics]
+# })
+# summary.to_csv(Path(OUTDIR) / "evaluation_summary_valid.csv", index=False)
 
 # Violin plot (NSE valid only)
-sns.violinplot(y=df_valid["NSE"], color="skyblue", inner="box")
-plt.axhline(0, color="k", ls="--", lw=1)
-plt.axhline(0.5, color="gray", ls="--", lw=1)
-plt.axhline(0.75, color="gray", ls="--", lw=1)
-plt.title(f"NSE distribution, valid basins only (n={n_valid})")
-plt.ylabel("NSE")
-plt.tight_layout()
-plt.savefig(Path(OUTDIR) / "fig_nse_violin_valid.png", dpi=FIG_DPI)
-plt.close()
+# sns.violinplot(y=df_valid["NSE"], color="skyblue", inner="box")
+# plt.axhline(0, color="k", ls="--", lw=1)
+# plt.axhline(0.5, color="gray", ls="--", lw=1)
+# plt.axhline(0.75, color="gray", ls="--", lw=1)
+# plt.title(f"NSE distribution, valid basins only (n={n_valid})")
+# plt.ylabel("NSE")
+# plt.tight_layout()
+# plt.savefig(Path(OUTDIR) / "fig_nse_violin_valid.png", dpi=FIG_DPI)
+# plt.close()
 
 # Random hydrographs for valid basins
 # Pick basins that we actually have stored time series for
@@ -260,11 +272,20 @@ else:
     print("No valid basins with available time series to plot hydrographs.")
     
 # Text summary
-with open(Path(OUTDIR) / "evaluation_report_valid.txt", "w") as f:
-    f.write("Evaluation Summary — Valid Basins Only\n")
+with open(Path(OUTDIR) / "evaluation_report_complete.txt", "w") as f:
+    f.write("Evaluation Summary\n")
     f.write("=====================================\n")
     f.write(f"Total basins: {n_total}\n")
-    f.write(f"Low-variance basins removed (std_obs <= {LOW_VAR_STD_TOL}): {n_lowvar} ({pct_lowvar:.2f}%)\n")
-    f.write(f"Valid basins kept: {n_valid} ({pct_valid:.2f}%)\n\n")
+    f.write(f"Negative Basins (NSE <= 0): {n_neg} ({pct_neg:.2f}%)\n")
+    f.write(f"Low-variance basins: (std_obs <= {LOW_VAR_STD_TOL}): {n_lowvar} ({pct_lowvar:.2f}%)\n\n")
+    f.write("====== Total Summary ======\n")
+    for m in metrics:
+        f.write(f"{m:<10} Mean={df[m].mean():.4f}  Median={df[m].median():.4f}\n")
+    f.write("\n")
+    f.write("====== Normal Variance Summary ======\n")
     for m in metrics:
         f.write(f"{m:<10} Mean={df_valid[m].mean():.4f}  Median={df_valid[m].median():.4f}\n")
+    f.write("\n")
+    f.write("====== Positive NSE Summary ======\n")
+    for m in metrics:
+        f.write(f"{m:<10} Mean={df_pos[m].mean():.4f}  Median={df_pos[m].median():.4f}\n")

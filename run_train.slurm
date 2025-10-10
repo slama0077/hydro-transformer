@@ -45,6 +45,6 @@ EXP_DIR="exp/lstm"
 python neuralhydrology_py/train.py "${CONFIG}" \
   --mode all \
   --gage-file "${GAGE_FILE}" \
-  --epochs 3 \
+  --epochs 1 \
   --exp-dir "${EXP_DIR}" \
   --device cuda:0

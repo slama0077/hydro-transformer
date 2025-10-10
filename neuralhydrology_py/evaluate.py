@@ -25,6 +25,7 @@ def main():
     # Clean problematic keys
     config_dict.pop("run_dir_is_set", None)
     config_dict.pop("resume_training", None)
+    config_dict.pop("allow_existing_run_dir", None)
 
     # Override test basins if provided
     if args.gage_file is not None:
