@@ -24,10 +24,7 @@ All raw and processed data should be stored inside the `data/` folder. The struc
   Example: `12345678_87654321.nc`
 
 - **`attributes/`**  
-    - Contains a CSV with static basin descriptors (e.g., `camelsatts.csv`). These include:  
-        - Basin length  
-        - Basin area  
-        - Reach length  
+    - Contains CSV with static basin descriptors (e.g., `camelsatts.csv`/`nwm_attributes.csv` (file too large to commit)). 
 
 - **`gages/`**  
 Contains text files listing gauge IDs for training, validation, and testing.  
@@ -218,7 +215,7 @@ This will start training... look below for example useage.---
   
 ---
 ### Citation
-If you wnat to use this repository, please cite as:
+If you want to use this repository, please cite as:
 
 `"Hydro-Transformer: Transformer Framework for Streamflow Estimation in Ungauged Basins Using Large-Scale Hydrologic Simulations"`
 
