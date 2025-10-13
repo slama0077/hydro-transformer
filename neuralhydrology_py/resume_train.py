@@ -55,7 +55,7 @@ def main():
 
 
     # Safe default: write to a child folder to avoid NH's "folder exists" error.
-    out_dir = run_dir / "resume_from001"
+    out_dir = run_dir / "resume_from002"
     out_dir.mkdir(exist_ok=True, parents=True)
     cfg._cfg["run_dir"] = out_dir
     cfg._cfg["experiment_name"] = out_dir.name

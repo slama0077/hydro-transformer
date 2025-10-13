@@ -8,9 +8,9 @@ file (e.g., `test_results.p`), computes performance metrics for each basin,
 filters out low-variance basins, and generates evaluation outputs.
 
 It produces:
-- `valid_basins_metrics.csv` — metrics for valid basins
+- `normal_var_basins.csv` — metrics for normal variance basins
 - `low_variance_basins.csv` — metrics for filtered-out basins
-- `evaluation_summary_valid.csv` — summary (mean, median) of metrics
+- `evaluation_report_complete.txt` — summary (mean, median) of metrics
 - Violin plot of NSE (`fig_nse_violin_valid.png`)
 - Random sample of hydrographs (`fig_hydrograph_<id>.png`)
 - Text summary report (`evaluation_report_valid.txt`)
