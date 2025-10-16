@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=lch3 # edit as needed
+#SBATCH --job-name=tc1 # edit as needed
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -12,7 +12,7 @@
 
 
 set -euo pipefail
-mkdir -p logs exp/lstm
+mkdir -p logs exp/transformer
 
 # Activate your env
 module load Anaconda3
@@ -36,9 +36,9 @@ print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else No
 PY
 
 # Paths - edit as needed
-CONFIG="02_train_configs/lstm/lstm_combined.yml"
+CONFIG="02_train_configs/transformer/transformer_combined.yml"
 GAGE_FILE="data/n5/gages/gage_list_clean.txt"
-EXP_DIR="exp/lstm"
+EXP_DIR="exp/transformer"
 
 
 # Train one model on the full gage list

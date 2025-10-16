@@ -45,19 +45,12 @@ Usage
 """
 
 # Configure paths
-input_file = Path("../data/gage_list.txt")
-output_file = Path("../data/gage_list_clean.txt")
+input_file = Path("../data/n10/gages/gage_list.txt")
+output_file = Path("../data/n10/gages/gage_list_clean.txt")
 
 # Invalid gages identified from RuntimeErrors and train-period checks
 invalid_gages = {
-    # From missing upstream attributes
-    "01123000", "02177000", "09447800",
-    "13337000", "14141500", "14185000",
-
-    # From no valid samples in train period
-    "01121000", "01187300", "01350000", "01365000", "01435000",
-    "02011400", "02178400", "06221400", "06409000", "09107000",
-    "10336660", "11124500", "11141280", "12115000", "14139800", "14185900"
+"03500240"
 }
 
 # Load, strip, and zero pad to ensure consistent 8-digit formatting

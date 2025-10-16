@@ -2,6 +2,7 @@
 data/**/time_series/
 toakinrele/*
 data/nwm_attributes.csv
+miscellaneous
 # 03_summarize/metrics
 # 03_summarize/output
 # neuralhydrology/

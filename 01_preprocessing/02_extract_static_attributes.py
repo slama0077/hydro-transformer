@@ -11,14 +11,11 @@ Inputs
     (columns: downstream, upstream, gage)
 
 - Attributes:
-    data/camelsatts.csv
-    (columns: id, basin_length, basin_area, reach_length)
+    data/camelsatts.csv or data/nwm_attributes.csv
 
 Outputs
 -------
 - data/n{reach_value}/attributes/static_attributes.csv
-    Columns: gage, basin_length_d, basin_area_d, reach_length_d,
-             basin_length_u, basin_area_u, reach_length_u
 
 Usage
 -----

@@ -40,6 +40,7 @@ Usage examples
 from pathlib import Path
 import argparse
 import pandas as pd
+import os
 
 
 def discover_basin_pairs(ts_dir: Path) -> pd.DataFrame:
@@ -156,10 +157,11 @@ def main():
                         help="Print planned renames without changing files.")
     args = parser.parse_args()
 
+    os.mkdir("{base_dir}/gages")
     # derive paths from reach-value
     base_dir = Path(f"data/n{args.reach_value}")
     args.ts_dir    = base_dir / "time_series"
-    args.gages_txt = base_dir / "gage_list.txt"
+    args.gages_txt = base_dir / gages / "gage_list.txt"
     args.pairs_out = base_dir / "basin_pair_with_gages.csv"
 
     # ensure dirs exist

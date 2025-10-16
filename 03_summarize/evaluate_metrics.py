@@ -10,10 +10,8 @@ filters out low-variance basins, and generates evaluation outputs.
 It produces:
 - `normal_var_basins.csv` — metrics for normal variance basins
 - `low_variance_basins.csv` — metrics for filtered-out basins
-- `evaluation_report_complete.txt` — summary (mean, median) of metrics
-- Violin plot of NSE (`fig_nse_violin_valid.png`)
 - Random sample of hydrographs (`fig_hydrograph_<id>.png`)
-- Text summary report (`evaluation_report_valid.txt`)
+- Text summary report (`evaluation_report_complete.txt`)
 
 Usage
 -----
