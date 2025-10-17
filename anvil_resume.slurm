@@ -1,12 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=lc2 # edit as needed
+#SBATCH --account=ees240087          # <-- REQUIRED
+#SBATCH --qos=gpu                    # <-- REQUIRED for GPU jobs
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
-#SBATCH --mem=64G
-#SBATCH --gres=gpu:v100:1
-#SBATCH --time=11:59:00
+#SBATCH --mem=32G                    # pick a value; uncommented
+#SBATCH --gpus=1                     # Anvil usually accepts --gpus or --gres=gpu:1
+#SBATC H --gres=gpu:1                # (alt syntax) use one of these, not both
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
 
