@@ -160,8 +160,8 @@ def main():
     
     # derive paths from reach-value
     base_dir = Path(f"data/n{args.reach_value}")
-    os.mkdir("{base_dir}/gages")
-    
+    os.mkdir(f"{base_dir}/gages")
+
     args.ts_dir    = base_dir / "time_series"
     args.gages_txt = base_dir / gages / "gage_list.txt"
     args.pairs_out = base_dir / "basin_pair_with_gages.csv"
