@@ -18,6 +18,11 @@ miscellaneous
 # neuralhydrology/nh_run.py
 exp/
 run_train_parallel.slurm
+anvil_evaluate.slurm
+anvil_run.slurm
+anvil_resume.slurm       
+
+
 
 # === Hydrology / Climate datasets ===
 *.nc

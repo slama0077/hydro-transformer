@@ -4,6 +4,8 @@ Static Attributes Builder
 
 This script merges downstream and upstream basin attributes into a single file.
 
+Note: make sure the nwm_attributes csv is in the right path
+
 Inputs
 ------
 - Basin pairs with gages:
@@ -20,7 +22,7 @@ Outputs
 Usage
 -----
 # Build static attributes for reach-value = 10
-python 02_static_attributes.py --reach-value 10
+python 02_extract_static_attributes.py --reach-value 10 --atts-csv data/nwm_attributes.csv
 """
 
 from pathlib import Path
