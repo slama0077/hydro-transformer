@@ -30,6 +30,9 @@ Example
     python evaluate_metrics.py \
         --pickle ../exp/lstm/lstm_upstream_0610_140026/test/model_epoch001/test_results.p \
         --outdir metrics/lstm
+    python 03_summarize/evaluate_metrics.py \
+        --pickle exp/lstm/lstm_combined_1310_141159/resume_from001/test/model_epoch001/test_results.p \
+        --outdir 03_summarize/metrics10/lstm_combined3
 
 Author
 ------
