@@ -36,8 +36,8 @@ print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else No
 PY
 
 # Paths - edit as needed
-GAGE_FILE="data/n5/gages/gage_list_clean.txt"
-RUN_DIR="exp/lstm/lstm_combined_0610_193144/resume_from001/resume_from002"
+GAGE_FILE="data/n10/gages/gage_list_clean.txt"
+RUN_DIR="exp/lstm/lstm_combined_1310_141159/resume_from001"
 
 
 # Evaluate model on the full gage list
