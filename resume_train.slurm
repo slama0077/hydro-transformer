@@ -36,8 +36,8 @@ print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else No
 PY
 
 # Paths - edit as needed
-CONFIG="exp/lstm/lstm_combined_1310_141159/config.yml"
-RUN_DIR="exp/lstm/lstm_combined_1310_141159"
+CONFIG="exp/lstm/lstm_upstream_1710_103048/config.yml"
+RUN_DIR="exp/lstm/lstm_upstream_1710_103048"
 
 
 # Train one model on the full gage list
