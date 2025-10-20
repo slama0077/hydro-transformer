@@ -163,7 +163,7 @@ save_validation_results: True
 dataset: nwm3retro
 
 # Path to data set root
-data_dir: data/n10
+data_dir: data/n1
 
 # Forcing product [daymet, maurer, maurer_extended, nldas, nldas_extended, nldas_hourly]
 # can be either a list of forcings or a single forcing product
