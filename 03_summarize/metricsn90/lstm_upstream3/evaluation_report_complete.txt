@@ -1,0 +1,32 @@
+Evaluation Summary
+=====================================
+Total basins: 52
+Negative Basins (NSE <= 0): 14 (26.92%)
+Low-variance basins: (std_obs <= 0.01): 9 (17.31%)
+
+====== Total Summary ======
+NSE        Mean=-1.9447  Median=0.1805
+NNSE       Mean=0.5156  Median=0.5496
+MSE        Mean=33.1110  Median=0.0185
+RMSE       Mean=1.9358  Median=0.1359
+MAE        Mean=0.6972  Median=0.0330
+KGE        Mean=-3.9943  Median=0.1001
+Pearson-r  Mean=0.4630  Median=0.4944
+
+====== Normal Variance Summary ======
+NSE        Mean=0.1640  Median=0.2195
+NNSE       Mean=0.5707  Median=0.5616
+MSE        Mean=40.0412  Median=0.0478
+RMSE       Mean=2.3388  Median=0.2187
+MAE        Mean=0.8421  Median=0.0517
+KGE        Mean=-0.1760  Median=0.1615
+Pearson-r  Mean=0.5192  Median=0.5489
+
+====== Positive NSE Summary ======
+NSE        Mean=0.2928  Median=0.2438
+NNSE       Mean=0.5937  Median=0.5694
+MSE        Mean=44.1044  Median=0.0850
+RMSE       Mean=2.4614  Median=0.2907
+MAE        Mean=0.8723  Median=0.0569
+KGE        Mean=0.1421  Median=0.2008
+Pearson-r  Mean=0.5606  Median=0.5987

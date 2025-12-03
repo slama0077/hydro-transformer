@@ -31,8 +31,12 @@ Example
         --pickle ../exp/lstm/lstm_upstream_0610_140026/test/model_epoch001/test_results.p \
         --outdir metrics/lstm
     python 03_summarize/evaluate_metrics.py \
-        --pickle exp/lstm/lstm_combined_1310_141159/resume_from001/test/model_epoch001/test_results.p \
-        --outdir 03_summarize/metrics10/lstm_combined3
+        --pickle exp/lstm/lstm_combined_0611_104424/test/model_epoch003/test_results.p \
+        --outdir 03_summarize/metricsn150/lstm_combined3
+    
+    python 03_summarize/evaluate_metrics.py \
+        --pickle exp/transformer/transformer_upstream_2810_102751/test/model_epoch002/test_results.p \
+        --outdir 03_summarize/metricsn20/trans_upstream1
 
 Author
 ------
@@ -56,14 +60,14 @@ args = parser.parse_args()
 # Assign arguments
 PICKLE_RESULTS_PATH = args.pickle
 OUTDIR = args.outdir
-TIME_KEY = "1H"
+TIME_KEY = "1h"
 OBS_VAR = "streamflow_u_obs"
 SIM_VAR = "streamflow_u_sim"
 # Try these time coordinate candidates in this order (first match wins)
 TIME_COORD_CANDIDATES = ["date", "time", "Time", "datetime"]
 LOW_VAR_STD_TOL = 0.01
 FIG_DPI = 300
-N_RANDOM_HYDROGRAPHS = 3
+N_RANDOM_HYDROGRAPHS = 4
 RANDOM_SEED = 152
 
 
@@ -154,6 +158,11 @@ for basin, top in results.items():
     rmse = float(np.sqrt(mse))
     mae = float(np.mean(np.abs(qsim - qobs)))
     nse_val = float(nse(qobs, qsim))
+
+    # --- Skip if NSE is inf or -inf ---
+    if not np.isfinite(nse_val):
+        continue
+
     nnse_val = float(nnse(nse_val)) if np.isfinite(nse_val) else np.nan
     kge_val = float(kge(qobs, qsim))
     r_val = float(pearson_r(qobs, qsim))
@@ -253,22 +262,64 @@ if valid_ids_with_ts:
     k = min(N_RANDOM_HYDROGRAPHS, len(valid_ids_with_ts))
     sample_basins = rng.choice(valid_ids_with_ts, size=k, replace=False)
 
-    for b in sample_basins:
-        ts = basin_timeseries[b]
-        nse_val = df_valid.loc[df_valid["basin"].eq(b), "NSE"].values[0]
+    # for b in sample_basins:
+    #     ts = basin_timeseries[b]
+    #     nse_val = df_valid.loc[df_valid["basin"].eq(b), "NSE"].values[0]
 
-        plt.figure(figsize=(12, 4))
-        plt.plot(ts["time"], ts["obs"], label="Observed", linewidth=1.6)
-        plt.plot(ts["time"], ts["sim"], label="Simulated", linewidth=1.6)
-        plt.xlabel("Date")
-        plt.ylabel("Discharge (m³/s)")
-        plt.title(f"Hydrograph {b}  (NSE={nse_val:.2f})")
-        plt.legend()
-        plt.tight_layout()
-        out_path = Path(OUTDIR) / f"fig_hydrograph_{b}.png"
-        plt.savefig(out_path, dpi=FIG_DPI, bbox_inches="tight")
+    #     plt.figure(figsize=(12, 4))
+    #     plt.plot(ts["time"], ts["obs"], label="Observed", linewidth=1.6)
+    #     plt.plot(ts["time"], ts["sim"], label="Simulated", linewidth=1.6)
+    #     plt.xlabel("Date")
+    #     plt.ylabel("Discharge (m³/s)")
+    #     plt.title(f"Hydrograph {b}  (NSE={nse_val:.2f})")
+    #     plt.legend()
+    #     plt.tight_layout()
+    #     out_path = Path(OUTDIR) / f"fig_hydrograph_{b}.png"
+    #     plt.savefig(out_path, dpi=FIG_DPI, bbox_inches="tight")
+    #     plt.close()
+    # print(f"Saved {k} hydrographs for valid basins in {OUTDIR}")
+
+
+
+    # --- Plot 4 hydrographs (2 rows x 2 columns) ---
+    if valid_ids_with_ts:
+        rng = np.random.default_rng(RANDOM_SEED)
+        k = min(N_RANDOM_HYDROGRAPHS, len(valid_ids_with_ts))
+        sample_basins = rng.choice(valid_ids_with_ts, size=k, replace=False)
+
+        # For a fixed 2×2 layout, pick exactly 4 if available
+        n_plots = min(4, len(sample_basins))
+        fig, axes = plt.subplots(2, 2, figsize=(6.8, 4.2), sharex=False, sharey=False)
+        axes = axes.flatten()
+
+        for i, b in enumerate(sample_basins[:n_plots]):
+            ts = basin_timeseries[b]
+            nse_val = df_valid.loc[df_valid["basin"].eq(b), "NSE"].values[0]
+            ax = axes[i]
+
+            ax.plot(ts["time"], ts["obs"], label="Observed", linewidth=1.1)
+            ax.plot(ts["time"], ts["sim"], label="Simulated", linewidth=1.1)
+
+            ax.set_title(f"Basin {b} (NSE={nse_val:.2f})", fontsize=9, pad=3)
+            ax.set_xlabel("Date", fontsize=8)
+            ax.set_ylabel("Discharge (m³/s)", fontsize=8)
+            ax.tick_params(axis='both', labelsize=7)
+            ax.grid(alpha=0.3)
+
+        # Remove any unused subplots if <4 basins
+        for j in range(n_plots, 4):
+            fig.delaxes(axes[j])
+
+        # Add shared legend outside
+        handles, labels = axes[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc='lower center', ncol=2, fontsize=8, frameon=False)
+
+        plt.tight_layout(rect=[0, 0.05, 1, 1])
+        out_path = Path(OUTDIR) / "fig_hydrograph_grid.png"
+        plt.savefig(out_path, dpi=400, bbox_inches="tight")
         plt.close()
-    print(f"Saved {k} hydrographs for valid basins in {OUTDIR}")
+        print(f"Saved 2×2 hydrograph grid as {out_path}")
+
 else:
     print("No valid basins with available time series to plot hydrographs.")
     
